@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Encoder/Decoder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        textarea, input {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            margin-right: 10px;
+            margin-bottom: 10px;
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .main-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .main-buttons button {
+            font-size: 1.2em;
+            padding: 12px 24px;
+            margin: 0 10px;
+        }
+        #encode {
+            background-color: #4CAF50;
+        }
+        #decode {
+            background-color: #008CBA;
+        }
+    </style>
+</head>
+<body>
+    <h1>Text Encoder/Decoder</h1>
+    <textarea id="input" rows="5" placeholder="Enter text here"></textarea>
+    <button onclick="pasteInput()">Paste</button>
+    <button onclick="clearInput()">Clear Input</button>
+    <input type="text" id="key" placeholder="Enter key phrase">
+    <div class="main-buttons">
+        <button id="encode" onclick="encode()">Encode</button>
+        <button id="decode" onclick="decode()">Decode</button>
+    </div>
+    <h2>Result:</h2>
+    <textarea id="output" rows="5" readonly></textarea>
+    <button onclick="copyOutput()">Copy</button>
+    <button onclick="clearOutput()">Clear Output</button>
+
+    <script>
+        function encode() {
+            const input = document.getElementById('input').value;
+            let key = document.getElementById('key').value.trim();
+            key = key === '' ? 'nirvana' : key;
+            const output = caesarCipher(input, key, true);
+            document.getElementById('output').value = output;
+        }
+
+        function decode() {
+            const input = document.getElementById('input').value;
+            let key = document.getElementById('key').value.trim();
+            key = key === '' ? 'nirvana' : key;
+            const output = caesarCipher(input, key, false);
+            document.getElementById('output').value = output;
+        }
+
+        function caesarCipher(text, key, encode) {
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 !@#$%^&*()_+-=[]{}|;:,.<>?';
+            let result = '';
+            let keyIndex = 0;
+
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const charIndex = alphabet.indexOf(char);
+
+                if (charIndex === -1) {
+                    result += char;
+                    continue;
+                }
+
+                const keyChar = key[keyIndex % key.length];
+                const shift = alphabet.indexOf(keyChar) % alphabet.length;
+                let newIndex;
+
+                if (encode) {
+                    newIndex = (charIndex + shift) % alphabet.length;
+                } else {
+                    newIndex = (charIndex - shift + alphabet.length) % alphabet.length;
+                }
+
+                result += alphabet[newIndex];
+                keyIndex++;
+            }
+
+            return result;
+        }
+
+        async function pasteInput() {
+            try {
+                const text = await navigator.clipboard.readText();
+                document.getElementById('input').value = text;
+            } catch (err) {
+                console.error('Error during paste:', err);
+                alert('Unable to paste text. Make sure you have granted the necessary permissions.');
+            }
+        }
+
+        function copyOutput() {
+            const output = document.getElementById('output');
+            output.select();
+            document.execCommand('copy');
+            alert('Text copied to clipboard!');
+        }
+
+        function clearInput() {
+            document.getElementById('input').value = '';
+        }
+
+        function clearOutput() {
+            document.getElementById('output').value = '';
+        }
+    </script>
+</body>
+</html>
